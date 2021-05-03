@@ -1,0 +1,26 @@
+{
+  "name": "eruda-pixel",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "postinstall": "cd react-pixel && yarn && cd ../eruda-pixel && yarn",
+    "dev-ui": "cd react-pixel && yarn start",
+    "dev-pixel": "cd eruda-pixel && yarn dev",
+    "build-ui": "cd react-pixel && yarn build && cd ../ && node ./compile.js",
+    "build-pixel": "yarn build-ui && cd ./eruda-pixel && yarn build"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Faithree/eruda-pixel.git"
+  },
+  "author": "Faithree",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/Faithree/eruda-pixel/issues"
+  },
+  "homepage": "https://github.com/Faithree/eruda-pixel#readme",
+  "devDependencies": {
+    "shelljs": "^0.8.4"
+  }
+}

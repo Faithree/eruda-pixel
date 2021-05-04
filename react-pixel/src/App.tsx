@@ -139,7 +139,7 @@ function App() {
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}
-      <div style={{ marginTop: 8 }}>上传</div>
+      <div style={{ marginTop: 8 }}>请先上传</div>
     </div>
   );
   return (

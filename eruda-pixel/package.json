@@ -1,6 +1,6 @@
 {
   "name": "eruda-pixel",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "main": "eruda-pixel.js",
   "scripts": {
     "dev": "webpack-dev-server --host 0.0.0.0",
@@ -8,11 +8,24 @@
     "ci": "npm run lint && npm run build",
     "lint": "eslint src/**/*.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/Faithree/eruda-pixel.git"
+  },
+  "files": [
+    "eruda-pixel.js",
+    "eruda-pixel.d.ts"
+  ],
+  "typings": "./eruda-pixel.d.ts",
   "keywords": [
     "eruda",
-    "plugin"
+    "plugin",
+    "UI",
+    "javascript",
+    "React",
+    "\b前端代码走查"
   ],
-  "author": "",
+  "author": "Faithree",
   "devDependencies": {
     "autoprefixer": "^7.2.2",
     "babel-core": "^6.26.0",

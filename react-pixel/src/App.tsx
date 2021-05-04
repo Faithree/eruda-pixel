@@ -60,7 +60,7 @@ function App() {
       imgNode.style['left'] = '0px';
       imgNode.style['display'] = 'block';
       imgNode.id = 'eruda-pixel-upload-img';
-      document.getElementById('eruda-pixel-upload-img')?.remove();
+      window.parent.document.getElementById('eruda-pixel-upload-img')?.remove();
       window.parent.document.body.appendChild(imgNode);
       imgNode.onload = function () {
         setLoading(false);

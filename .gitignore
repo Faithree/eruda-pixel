@@ -7,7 +7,7 @@
 /package-lock.json
 /local.config.json
 /local.config.js
-
+.eslintcache
 # production
 /dist
 

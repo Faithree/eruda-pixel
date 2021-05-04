@@ -107,11 +107,10 @@ module.exports = function (eruda) {
     init($el, container) {
       super.init($el, container);
       $el.html(require('./template.hbs')());
-      //   console.log(this._$el.find('#ui-check-iframe').get(0))
     }
 
     show() {
-      const $iframe = this._$el.find('#ui-check-iframe').get(0);
+      const $iframe = this._$el.find('#eruda-pixel-iframe').get(0);
       injectJsOnce(injectString, $iframe);
       injectCssOnce(styleString, $iframe);
       _binndPostMessage($iframe, this._$el);

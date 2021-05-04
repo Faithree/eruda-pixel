@@ -59,6 +59,7 @@ function App() {
       imgNode.style['top'] = '0px';
       imgNode.style['left'] = '0px';
       imgNode.style['display'] = 'block';
+      imgNode.style['zIndex'] = '1000';
       imgNode.id = 'eruda-pixel-upload-img';
       window.parent.document.getElementById('eruda-pixel-upload-img')?.remove();
       window.parent.document.body.appendChild(imgNode);
@@ -87,6 +88,9 @@ function App() {
     { label: '变暗', value: 'darken' },
     { label: '变亮', value: 'lighten' },
     { label: '差值', value: 'difference' },
+    { label: '排除', value: 'exclusion' },
+    { label: '强光', value: 'hard-light' },
+    { label: '柔光', value: 'soft-light' },
   ];
 
   function onRadioChange(checkedValues: CheckboxValueType[]) {

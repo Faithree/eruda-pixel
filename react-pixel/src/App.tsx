@@ -36,12 +36,11 @@ function App() {
   };
   useEffect(() => {
     Messager.listen('img-position', (data) => {
-      const p = {
-        ...imgInfo,
+      const position = {
         left: parseInt(data.left),
         top: parseInt(data.top),
       };
-      setImgInfo(p);
+      setImgInfo((imgInfo) => ({ ...imgInfo, ...position }));
     });
   }, []);
 

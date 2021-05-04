@@ -32,7 +32,7 @@ const postcssNormalize = require('postcss-normalize');
 const appPackageJson = require(paths.appPackageJson);
 
 // Source maps are resource heavy and can cause out of memory issue for large source files.
-const shouldUseSourceMap = 'false';
+const shouldUseSourceMap = process.env.GENERATE_SOURCEMAP !== 'false';
 
 const webpackDevClientEntry = require.resolve(
   'react-dev-utils/webpackHotDevClient'
@@ -44,6 +44,9 @@ const reactRefreshOverlayEntry = require.resolve(
 // Some apps do not need the benefits of saving a web request, so not inlining the chunk
 // makes for a smoother build process.
 const shouldInlineRuntimeChunk = process.env.INLINE_RUNTIME_CHUNK !== 'false';
+
+const emitErrorsAsWarnings = process.env.ESLINT_NO_DEV_ERRORS === 'true';
+const disableESLintPlugin = process.env.DISABLE_ESLINT_PLUGIN === 'true';
 
 const imageInlineSizeLimit = parseInt(
   process.env.IMAGE_INLINE_SIZE_LIMIT || '10000'
@@ -131,6 +134,7 @@ module.exports = function (webpackEnv) {
             // which in turn let's users customize the target behavior as per their needs.
             postcssNormalize(),
           ],
+          sourceMap: isEnvProduction ? shouldUseSourceMap : isEnvDevelopment,
         },
       },
     ].filter(Boolean);
@@ -139,11 +143,15 @@ module.exports = function (webpackEnv) {
         {
           loader: require.resolve('resolve-url-loader'),
           options: {
+            sourceMap: isEnvProduction ? shouldUseSourceMap : isEnvDevelopment,
             root: paths.appSrc,
           },
         },
         {
           loader: require.resolve(preProcessor),
+          options: {
+            sourceMap: true,
+          },
         }
       );
     }
@@ -154,6 +162,11 @@ module.exports = function (webpackEnv) {
     mode: isEnvProduction ? 'production' : isEnvDevelopment && 'development',
     // Stop compilation early in production
     bail: isEnvProduction,
+    devtool: isEnvProduction
+      ? shouldUseSourceMap
+        ? 'source-map'
+        : false
+      : isEnvDevelopment && 'cheap-module-source-map',
     // These are the "entry points" to our application.
     // This means they will be the "root" imports that are included in JS bundle.
     entry:
@@ -258,6 +271,7 @@ module.exports = function (webpackEnv) {
               ascii_only: true,
             },
           },
+          sourceMap: shouldUseSourceMap,
         }),
         // This is only used in production mode
         new OptimizeCSSAssetsPlugin({
@@ -282,6 +296,16 @@ module.exports = function (webpackEnv) {
       // Automatically split vendor and commons
       // https://twitter.com/wSokra/status/969633336732905474
       // https://medium.com/webpack/webpack-4-code-splitting-chunk-graph-and-the-splitchunks-optimization-be739a861366
+      // splitChunks: {
+      //   chunks: 'all',
+      //   name: isEnvDevelopment,
+      // },
+      // Keep the runtime chunk separated to enable long term caching
+      // https://twitter.com/wSokra/status/969679223278505985
+      // https://github.com/facebook/create-react-app/issues/5358
+      // runtimeChunk: {
+      //   name: entrypoint => `runtime-${entrypoint.name}`,
+      // },
     },
     resolve: {
       // This allows you to set a fallback for where webpack should look for modules.
@@ -353,10 +377,6 @@ module.exports = function (webpackEnv) {
                 mimetype: 'image/avif',
                 name: 'static/media/[name].[hash:8].[ext]',
               },
-            },
-            {
-              test: /\.txt$/,
-              use: ["raw-loader"],
             },
             // "url" loader works like "file" loader except that it embeds assets
             // smaller than specified limit in bytes as data URLs to avoid requests.
@@ -432,7 +452,12 @@ module.exports = function (webpackEnv) {
                 cacheDirectory: true,
                 // See #6846 for context on why cacheCompression is disabled
                 cacheCompression: false,
-
+                
+                // Babel sourcemaps are needed for debugging into node_modules
+                // code.  Without the options below, debuggers like VSCode
+                // show incorrect code and set breakpoints on the wrong lines.
+                sourceMaps: shouldUseSourceMap,
+                inputSourceMap: shouldUseSourceMap,
               },
             },
             // "postcss" loader applies autoprefixer to our CSS.
@@ -447,6 +472,9 @@ module.exports = function (webpackEnv) {
               exclude: cssModuleRegex,
               use: getStyleLoaders({
                 importLoaders: 1,
+                sourceMap: isEnvProduction
+                  ? shouldUseSourceMap
+                  : isEnvDevelopment,
               }),
               // Don't consider CSS imports dead code even if the
               // containing package claims to have no side effects.
@@ -460,6 +488,9 @@ module.exports = function (webpackEnv) {
               test: cssModuleRegex,
               use: getStyleLoaders({
                 importLoaders: 1,
+                sourceMap: isEnvProduction
+                  ? shouldUseSourceMap
+                  : isEnvDevelopment,
                 modules: {
                   getLocalIdent: getCSSModuleLocalIdent,
                 },
@@ -474,6 +505,9 @@ module.exports = function (webpackEnv) {
               use: getStyleLoaders(
                 {
                   importLoaders: 3,
+                  sourceMap: isEnvProduction
+                    ? shouldUseSourceMap
+                    : isEnvDevelopment,
                 },
                 'sass-loader'
               ),
@@ -490,6 +524,9 @@ module.exports = function (webpackEnv) {
               use: getStyleLoaders(
                 {
                   importLoaders: 3,
+                  sourceMap: isEnvProduction
+                    ? shouldUseSourceMap
+                    : isEnvDevelopment,
                   modules: {
                     getLocalIdent: getCSSModuleLocalIdent,
                   },
@@ -675,25 +712,31 @@ module.exports = function (webpackEnv) {
           // The formatter is invoked directly in WebpackDevServerUtils during development
           formatter: isEnvProduction ? typescriptFormatter : undefined,
         }),
-      new ESLintPlugin({
-        // Plugin options
-        extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
-        formatter: require.resolve('react-dev-utils/eslintFormatter'),
-        eslintPath: require.resolve('eslint'),
-        context: paths.appSrc,
-        cache: true,
-        // ESLint class options
-        cwd: paths.appPath,
-        resolvePluginsRelativeTo: __dirname,
-        baseConfig: {
-          extends: [require.resolve('eslint-config-react-app/base')],
-          rules: {
-            ...(!hasJsxRuntime && {
-              'react/react-in-jsx-scope': 'error',
-            }),
+      !disableESLintPlugin &&
+        new ESLintPlugin({
+          // Plugin options
+          extensions: ['js', 'mjs', 'jsx', 'ts', 'tsx'],
+          formatter: require.resolve('react-dev-utils/eslintFormatter'),
+          eslintPath: require.resolve('eslint'),
+          failOnError: !(isEnvDevelopment && emitErrorsAsWarnings),
+          context: paths.appSrc,
+          cache: true,
+          cacheLocation: path.resolve(
+            paths.appNodeModules,
+            '.cache/.eslintcache'
+          ),
+          // ESLint class options
+          cwd: paths.appPath,
+          resolvePluginsRelativeTo: __dirname,
+          baseConfig: {
+            extends: [require.resolve('eslint-config-react-app/base')],
+            rules: {
+              ...(!hasJsxRuntime && {
+                'react/react-in-jsx-scope': 'error',
+              }),
+            },
           },
-        },
-      }),
+        }),
     ].filter(Boolean),
     // Some libraries import Node modules but don't use them in the browser.
     // Tell webpack to provide empty mocks for them so importing them works.

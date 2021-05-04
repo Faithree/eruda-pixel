@@ -11,17 +11,17 @@ import {
   Col,
   Row,
 } from 'antd';
+import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
-import { InboxOutlined } from '@ant-design/icons';
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
 import PostMessager from './post-messager';
 
 import './App.css';
-const { Dragger } = Upload;
 const Messager = new PostMessager(window.parent, true);
 
 function App() {
   const [size, setSize] = useState(100);
+  const [loading, setLoading] = useState(false);
   const [imgInfo, setImgInfo] = useState({
     left: 0,
     top: 0,
@@ -47,8 +47,9 @@ function App() {
   const [url, setUrl] = useState('');
   const props: any = {
     name: 'file',
-    multiple: true,
+    multiple: false,
     beforeUpload(file: FileReader) {
+      setLoading(true);
       const url = URL.createObjectURL(file);
       setUrl(url);
       var imgNode = document.createElement('img');
@@ -58,9 +59,11 @@ function App() {
       imgNode.style['top'] = '0px';
       imgNode.style['left'] = '0px';
       imgNode.style['display'] = 'block';
-      imgNode.id = 'eruda-pixel';
+      imgNode.id = 'eruda-pixel-upload-img';
+      document.getElementById('eruda-pixel-upload-img')?.remove();
       window.parent.document.body.appendChild(imgNode);
       imgNode.onload = function () {
+        setLoading(false);
         setImgInfo({
           width: (this as any).width,
           height: (this as any).height,
@@ -129,12 +132,18 @@ function App() {
       info: info,
     });
   }
+  const uploadButton = (
+    <div>
+      {loading ? <LoadingOutlined /> : <PlusOutlined />}
+      <div style={{ marginTop: 8 }}>上传</div>
+    </div>
+  );
   return (
-    <Space direction="vertical" size={0}>
+    <Space direction="vertical">
       <Card
         title={
           <Space>
-            <div className="mr-20">eruda-pixe</div>
+            <div className="mr100">eruda-pixe </div>
             <Checkbox.Group
               options={plainOptions}
               disabled={!url}
@@ -238,15 +247,9 @@ function App() {
         </Row>
       </Card>
       <Card>
-        <Dragger {...props}>
-          <p className="ant-upload-drag-icon">
-            <InboxOutlined />
-          </p>
-          <p className="ant-upload-text">
-            Click or drag file to this area to upload 拖拽或者点击上传图片
-          </p>
-          <p className="ant-upload-hint">上传图片后，即可操作上面的配置。</p>
-        </Dragger>
+        <Upload {...props} listType="picture-card" maxCount={1}>
+          {uploadButton}
+        </Upload>
       </Card>
     </Space>
   );

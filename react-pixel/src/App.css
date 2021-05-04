@@ -1,3 +1,10 @@
 .mb16 {
   margin-bottom: 16px;
 }
+.container {
+  min-width: 375px;
+}
+
+.mr100 {
+  margin-right: 100px;
+}

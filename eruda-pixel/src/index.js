@@ -47,7 +47,7 @@ function _binndPostMessage($iframe, $el) {
   const targetWindow = $iframe.contentWindow;
   const Messager = new PostMessager(targetWindow, true);
   Messager.listen('img-created', () => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
     const draggabilly = new Draggabilly($img, {});
     draggabilly.on('dragEnd', () => {
       console.log($img.style);
@@ -58,13 +58,13 @@ function _binndPostMessage($iframe, $el) {
     });
   });
   Messager.listen('img-opacity', (data) => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
     const opacity = data.opacity / 100;
     $img.style['opacity'] = opacity;
   });
 
   Messager.listen('img-freeze', (data) => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
     if (data.freeze) {
       $img.style['pointer-events'] = 'none';
     } else {
@@ -73,7 +73,7 @@ function _binndPostMessage($iframe, $el) {
   });
 
   Messager.listen('img-show', (data) => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
     if (data.show) {
       $img.style['display'] = 'block';
     } else {
@@ -82,12 +82,12 @@ function _binndPostMessage($iframe, $el) {
   });
 
   Messager.listen('img-mode', (data) => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
     $img.style['mix-blend-mode'] = data.mode;
   });
 
   Messager.listen('img-info', (data) => {
-    const $img = document.querySelector('#eruda-pixel');
+    const $img = document.querySelector('#eruda-pixel-upload-img');
 
     $img.style['width'] = data.info.width + 'px';
     $img.style['height'] = 'auto';

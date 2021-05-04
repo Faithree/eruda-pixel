@@ -42,7 +42,7 @@ function App() {
       };
       setImgInfo(p);
     });
-  }, []);
+  }, [imgInfo]);
 
   const [url, setUrl] = useState('');
   const props = {
@@ -101,7 +101,6 @@ function App() {
     });
   }
   function onWidth(value) {
-    console.log(value);
     const info = {
       ...imgInfo,
       width: value,
@@ -139,41 +138,47 @@ function App() {
             <div className="mr-20">eruda-pixe</div>
             <Checkbox.Group
               options={plainOptions}
+              disabled={!url}
               onChange={onRadioChange}
               defaultValue={['show']}
             />
           </Space>
         }
       >
-        <div>
-          模式：
-          <Select
-            defaultValue="normal"
-            style={{ width: 160 }}
-            onChange={onTypeChange}
-          >
-            {modeOptions.map((item) => {
-              return (
-                <Select.Option value={item.value} key={item.value}>
-                  {item.label}
-                </Select.Option>
-              );
-            })}
-          </Select>
-        </div>
+        <Row align="middle" className="mb16">
+          <Col span={4}>模式：</Col>
+          <Col span={20}>
+            <Select
+              defaultValue="normal"
+              style={{ width: 160 }}
+              onChange={onTypeChange}
+              disabled={!url}
+            >
+              {modeOptions.map((item) => {
+                return (
+                  <Select.Option value={item.value} key={item.value}>
+                    {item.label}
+                  </Select.Option>
+                );
+              })}
+            </Select>
+          </Col>
+        </Row>
 
         <Row align="middle">
           <Col span={4}>透明度:</Col>
-          <Col span={14}>
+          <Col span={13}>
             <Slider
+              disabled={!url}
               min={1}
               max={100}
               onChange={onInnputChange}
               value={typeof size === 'number' ? size : 0}
             />
           </Col>
-          <Col span={6}>
+          <Col span={4} offset={1}>
             <InputNumber
+              disabled={!url}
               min={1}
               max={100}
               value={size}
@@ -195,6 +200,7 @@ function App() {
           <Col span={4}>宽度：</Col>
           <Col span={8}>
             <InputNumber
+              disabled={!url}
               value={imgInfo.width}
               min
               max
@@ -211,6 +217,7 @@ function App() {
             <InputNumber
               value={imgInfo.left}
               min
+              disabled={!url}
               max
               formatter={(value) => `${value}px`}
               parser={(value) => value.replace('px', '')}
@@ -223,6 +230,7 @@ function App() {
               value={imgInfo.top}
               min
               max
+              disabled={!url}
               formatter={(value) => `${value}px`}
               parser={(value) => value.replace('px', '')}
               onChange={onTop}
@@ -236,12 +244,9 @@ function App() {
             <InboxOutlined />
           </p>
           <p className="ant-upload-text">
-            Click or drag file to this area to upload
+            Click or drag file to this area to upload 拖拽或者点击上传图片
           </p>
-          <p className="ant-upload-hint">
-            Support for a single or bulk upload. Strictly prohibit from
-            uploading company data or other band files
-          </p>
+          <p className="ant-upload-hint">上传图片后，即可操作上面的配置。</p>
         </Dragger>
       </Card>
     </Space>

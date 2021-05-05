@@ -22,6 +22,10 @@ const Messager = new PostMessager(window.parent, true);
 function App() {
   const [size, setSize] = useState(100);
   const [loading, setLoading] = useState(false);
+  const [modeValue, setModeValue] = useState('normal');
+  const [freeOrShowValue, setFreeOrShowValue] = useState<CheckboxValueType[]>([
+    'show',
+  ]);
   const [imgInfo, setImgInfo] = useState({
     left: 0,
     top: 0,
@@ -89,6 +93,9 @@ function App() {
           left: 0,
           top: 0,
         });
+        setSize(100);
+        setModeValue('normal');
+        setFreeOrShowValue(['show']);
         Messager.send('img-created', 'created');
       };
       return false;
@@ -111,7 +118,8 @@ function App() {
     { label: '柔光', value: 'soft-light' },
   ];
 
-  function onRadioChange(checkedValues: CheckboxValueType[]) {
+  function onFreeOrShowChange(checkedValues: CheckboxValueType[]) {
+    setFreeOrShowValue(checkedValues);
     Messager.send('img-freeze', {
       freeze: checkedValues.includes('freeze'),
     });
@@ -119,7 +127,8 @@ function App() {
       show: checkedValues.includes('show'),
     });
   }
-  function onTypeChange(value: string) {
+  function onModeChange(value: string) {
+    setModeValue(value);
     Messager.send('img-mode', {
       mode: value,
     });
@@ -161,7 +170,7 @@ function App() {
     </div>
   );
   return (
-    <Space direction="vertical">
+    <Space direction="vertical" className="pixel-container">
       <Card
         title={
           <Space>
@@ -169,8 +178,8 @@ function App() {
             <Checkbox.Group
               options={plainOptions}
               disabled={!url}
-              onChange={onRadioChange}
-              defaultValue={['show']}
+              onChange={onFreeOrShowChange}
+              value={freeOrShowValue}
             />
           </Space>
         }
@@ -179,10 +188,10 @@ function App() {
           <Col span={4}>模式：</Col>
           <Col span={20}>
             <Select
-              defaultValue="normal"
               style={{ width: 160 }}
-              onChange={onTypeChange}
+              onChange={onModeChange}
               disabled={!url}
+              value={modeValue}
             >
               {modeOptions.map((item) => {
                 return (

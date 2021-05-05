@@ -4,6 +4,6 @@
 .mr100 {
   margin-right: 100px;
 }
-.ant-upload.ant-upload-select-picture-card {
+.pixel-container .ant-upload.ant-upload-select-picture-card {
   border-color: #1890ff;
 }

@@ -36,21 +36,18 @@ function onceCss(fn) {
     }
   };
 }
-
-function _getDefPos() {
-  return {
-    x: 0,
-    y: 0,
-  };
-}
 function _binndPostMessage($iframe, $el) {
   const targetWindow = $iframe.contentWindow;
   const Messager = new PostMessager(targetWindow, true);
+  let $img = null;
   Messager.listen('img-created', () => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
+    const shadowImg = document.body.shadowRoot
+      ? document.body.shadowRoot.querySelector('#eruda-pixel-upload-img')
+      : null;
+    const lightImg = document.querySelector('#eruda-pixel-upload-img');
+    $img = shadowImg || lightImg; // 虚拟节点或者真实节点
     const draggabilly = new Draggabilly($img, {});
     draggabilly.on('dragEnd', () => {
-      console.log($img.style);
       Messager.send('img-position', {
         top: $img.style.top,
         left: $img.style.left,
@@ -58,13 +55,11 @@ function _binndPostMessage($iframe, $el) {
     });
   });
   Messager.listen('img-opacity', (data) => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
     const opacity = data.opacity / 100;
     $img.style['opacity'] = opacity;
   });
 
   Messager.listen('img-freeze', (data) => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
     if (data.freeze) {
       $img.style['pointer-events'] = 'none';
     } else {
@@ -73,7 +68,6 @@ function _binndPostMessage($iframe, $el) {
   });
 
   Messager.listen('img-show', (data) => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
     if (data.show) {
       $img.style['display'] = 'block';
     } else {
@@ -82,13 +76,10 @@ function _binndPostMessage($iframe, $el) {
   });
 
   Messager.listen('img-mode', (data) => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
     $img.style['mix-blend-mode'] = data.mode;
   });
 
   Messager.listen('img-info', (data) => {
-    const $img = document.querySelector('#eruda-pixel-upload-img');
-
     $img.style['width'] = data.info.width + 'px';
     $img.style['height'] = 'auto';
     $img.style['left'] = data.info.left + 'px';
@@ -97,7 +88,6 @@ function _binndPostMessage($iframe, $el) {
 }
 module.exports = function (eruda) {
   let { evalCss } = eruda.util;
-  console.log(eruda)
   class Pixel extends eruda.Tool {
     constructor() {
       super();

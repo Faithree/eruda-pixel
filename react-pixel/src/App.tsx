@@ -61,8 +61,26 @@ function App() {
       imgNode.style['display'] = 'block';
       imgNode.style['zIndex'] = '1000';
       imgNode.id = 'eruda-pixel-upload-img';
-      window.parent.document.getElementById('eruda-pixel-upload-img')?.remove();
-      window.parent.document.body.appendChild(imgNode);
+
+      let shadowRoot: ShadowRoot | null;
+      const body = window.parent.document.body;
+      if (body.attachShadow) {
+        if (body.shadowRoot) {
+          // 替换原有的图片;
+          const $img = body.shadowRoot.getElementById('eruda-pixel-upload-img');
+          $img?.remove();
+          body.shadowRoot.appendChild(imgNode);
+        } else {
+          shadowRoot = body.attachShadow({ mode: 'open' });
+          shadowRoot.appendChild(imgNode);
+        }
+      } else {
+        // 替换原有的图片;
+        window.parent.document
+          .getElementById('eruda-pixel-upload-img')
+          ?.remove();
+        body.appendChild(imgNode);
+      }
       imgNode.onload = function () {
         setLoading(false);
         setImgInfo({

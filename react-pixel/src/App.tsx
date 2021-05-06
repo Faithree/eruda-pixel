@@ -63,27 +63,29 @@ function App() {
       imgNode.style['top'] = '0px';
       imgNode.style['left'] = '0px';
       imgNode.style['display'] = 'block';
+      imgNode.style['opacity'] = '50%';
       imgNode.style['zIndex'] = '1000';
       imgNode.id = 'eruda-pixel-upload-img';
 
-      let shadowRoot: ShadowRoot | null;
+      let shadowRoot: ShadowRoot;
       const body = window.parent.document.body;
-      if (body.attachShadow) {
-        if (body.shadowRoot) {
-          // 替换原有的图片;
-          const $img = body.shadowRoot.getElementById('eruda-pixel-upload-img');
-          $img?.remove();
-          body.shadowRoot.appendChild(imgNode);
-        } else {
-          shadowRoot = body.attachShadow({ mode: 'open' });
-          shadowRoot.appendChild(imgNode);
-        }
+      // 删除原有的 img 容器
+      window.parent.document
+        .getElementById('eruda-pixel-upload-img-container')
+        ?.remove();
+      // 创建 img 容器
+      let imgContainer = document.createElement('div');
+      imgContainer.id = 'eruda-pixel-upload-img-container';
+      body.appendChild(imgContainer);
+      imgContainer.style.all = 'initial'
+
+      if (imgContainer.attachShadow) {
+        // shadow dom 避免样式污染
+        shadowRoot = imgContainer.attachShadow({ mode: 'open' });
+        shadowRoot.appendChild(imgNode);
       } else {
-        // 替换原有的图片;
-        window.parent.document
-          .getElementById('eruda-pixel-upload-img')
-          ?.remove();
-        body.appendChild(imgNode);
+        // shadow dom 降级
+        imgContainer.appendChild(imgNode);
       }
       imgNode.onload = function () {
         setLoading(false);
@@ -93,7 +95,7 @@ function App() {
           left: 0,
           top: 0,
         });
-        setSize(100);
+        setSize(50);
         setModeValue('normal');
         setFreeOrShowValue(['show']);
         Messager.send('img-created', 'created');

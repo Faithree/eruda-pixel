@@ -41,11 +41,16 @@ function _binndPostMessage($iframe, $el) {
   const Messager = new PostMessager(targetWindow, true);
   let $img = null;
   Messager.listen('img-created', () => {
-    const shadowImg = document.body.shadowRoot
-      ? document.body.shadowRoot.querySelector('#eruda-pixel-upload-img')
+    const container = document.querySelector(
+      '#eruda-pixel-upload-img-container'
+    );
+    const shadowImg = container.shadowRoot
+      ? container.shadowRoot.querySelector('#eruda-pixel-upload-img')
       : null;
-    const lightImg = document.querySelector('#eruda-pixel-upload-img');
-    $img = shadowImg || lightImg; // 虚拟节点或者真实节点
+    // 真实节点
+    const lightImg = container.querySelector('#eruda-pixel-upload-img');
+
+    $img = shadowImg || lightImg; // 首选虚拟节点，没有则真实节点
     const draggabilly = new Draggabilly($img, {});
     draggabilly.on('dragEnd', () => {
       Messager.send('img-position', {

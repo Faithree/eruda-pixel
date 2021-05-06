@@ -52,57 +52,53 @@ function App() {
   const props: any = {
     name: 'file',
     multiple: false,
-    beforeUpload(file: Blob) {
+    beforeUpload(file: FileReader) {
       setLoading(true);
-      const reader = new FileReader();
-      reader.readAsDataURL(file);
-      reader.onload = function () {
-        const url: string = this.result as string;
-        var imgNode = document.createElement('img');
-        imgNode.src = url;
-        imgNode.style['cursor'] = 'all-scroll';
-        imgNode.style['position'] = 'fixed';
-        imgNode.style['top'] = '0px';
-        imgNode.style['left'] = '0px';
-        imgNode.style['display'] = 'block';
-        imgNode.style['opacity'] = '50%';
-        imgNode.style['zIndex'] = '1000';
-        imgNode.id = 'eruda-pixel-upload-img';
+      const url = URL.createObjectURL(file);
+      setUrl(url);
+      var imgNode = document.createElement('img');
+      imgNode.src = url;
+      imgNode.style['cursor'] = 'all-scroll';
+      imgNode.style['position'] = 'fixed';
+      imgNode.style['top'] = '0px';
+      imgNode.style['left'] = '0px';
+      imgNode.style['display'] = 'block';
+      imgNode.style['opacity'] = '50%';
+      imgNode.style['zIndex'] = '1000';
+      imgNode.id = 'eruda-pixel-upload-img';
 
-        let shadowRoot: ShadowRoot;
-        const body = window.parent.document.body;
-        // 删除原有的 img 容器
-        window.parent.document
-          .getElementById('eruda-pixel-upload-img-container')
-          ?.remove();
-        // 创建 img 容器
-        let imgContainer = document.createElement('div');
-        imgContainer.id = 'eruda-pixel-upload-img-container';
-        body.appendChild(imgContainer);
-        imgContainer.style.all = 'initial';
+      let shadowRoot: ShadowRoot;
+      const body = window.parent.document.body;
+      // 删除原有的 img 容器
+      window.parent.document
+        .getElementById('eruda-pixel-upload-img-container')
+        ?.remove();
+      // 创建 img 容器
+      let imgContainer = document.createElement('div');
+      imgContainer.id = 'eruda-pixel-upload-img-container';
+      body.appendChild(imgContainer);
+      imgContainer.style.all = 'initial'
 
-        if (imgContainer.attachShadow) {
-          // shadow dom 避免样式污染
-          shadowRoot = imgContainer.attachShadow({ mode: 'open' });
-          shadowRoot.appendChild(imgNode);
-        } else {
-          // shadow dom 降级
-          imgContainer.appendChild(imgNode);
-        }
-        imgNode.onload = function () {
-          setLoading(false);
-          setImgInfo({
-            width: (this as any).width,
-            height: (this as any).height,
-            left: 0,
-            top: 0,
-          });
-          setUrl(url);
-          setSize(50);
-          setModeValue('normal');
-          setFreeOrShowValue(['show']);
-          Messager.send('img-created', 'created');
-        };
+      if (imgContainer.attachShadow) {
+        // shadow dom 避免样式污染
+        shadowRoot = imgContainer.attachShadow({ mode: 'open' });
+        shadowRoot.appendChild(imgNode);
+      } else {
+        // shadow dom 降级
+        imgContainer.appendChild(imgNode);
+      }
+      imgNode.onload = function () {
+        setLoading(false);
+        setImgInfo({
+          width: (this as any).width,
+          height: (this as any).height,
+          left: 0,
+          top: 0,
+        });
+        setSize(50);
+        setModeValue('normal');
+        setFreeOrShowValue(['show']);
+        Messager.send('img-created', 'created');
       };
       return false;
     },

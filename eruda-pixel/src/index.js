@@ -16,10 +16,20 @@ function injectCss(cssContent, $iframe) {
   style.innerHTML = cssContent;
   $iframe.contentWindow.document.body.appendChild(style);
 }
+function _bindDragEvent($el, Messager) {
+  const draggabilly = new Draggabilly($el, {});
 
-function _binndPostMessage($iframe, $el) {
+  draggabilly.on('dragEnd', () => {
+    Messager.send('img-position', {
+      top: $el.style.top,
+      left: $el.style.left,
+    });
+  });
+}
+
+function _bindPostMessage($iframe) {
   const targetWindow = $iframe.contentWindow;
-  const Messager = new PostMessager(targetWindow, true);
+  const Messager = new PostMessager(targetWindow);
   let $img = null;
   Messager.listen('img-created', () => {
     const container = document.querySelector('#eruda-pixel-upload-img-container');
@@ -30,13 +40,7 @@ function _binndPostMessage($iframe, $el) {
     const lightImg = container.querySelector('#eruda-pixel-upload-img');
 
     $img = shadowImg || lightImg; // 首选虚拟节点，没有则真实节点
-    const draggabilly = new Draggabilly($img, {});
-    draggabilly.on('dragEnd', () => {
-      Messager.send('img-position', {
-        top: $img.style.top,
-        left: $img.style.left,
-      });
-    });
+    _bindDragEvent($img, Messager);
   });
   Messager.listen('img-opacity', (data) => {
     const opacity = data.opacity / 100;
@@ -82,7 +86,7 @@ module.exports = function (eruda) {
       const $iframe = this._$el.find('#eruda-pixel-iframe').get(0);
       injectJs(injectString, $iframe);
       injectCss(styleString, $iframe);
-      _binndPostMessage($iframe, this._$el);
+      _bindPostMessage($iframe, this._$el);
     }
 
     show() {

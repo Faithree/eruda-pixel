@@ -49,9 +49,9 @@ function _bindPostMessage($iframe) {
 
   Messager.listen('img-freeze', (data) => {
     if (data.freeze) {
-      $img.style['pointer-events'] = 'none';
+      $img.style['pointerEvents'] = 'none';
     } else {
-      $img.style['pointer-events'] = 'auto';
+      $img.style['pointerEvents'] = 'auto';
     }
   });
 

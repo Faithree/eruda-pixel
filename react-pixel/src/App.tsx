@@ -9,6 +9,23 @@ import PostMessager from './post-messager';
 import './App.css';
 const Messager = new PostMessager(window.parent, true);
 
+function getLocalStorage() {
+  return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
+}
+
+function setLocalStorage(obj: Record<string, string | number>) {
+  // 取
+  const cacheObj = getLocalStorage();
+  // 存
+  window.localStorage.setItem(
+    'eruda-pixel',
+    JSON.stringify({
+      ...cacheObj,
+      ...obj,
+    }),
+  );
+}
+
 function App() {
   const [size, setSize] = useState(100);
   const [loading, setLoading] = useState(false);
@@ -25,6 +42,9 @@ function App() {
     Messager.send('img-opacity', {
       opacity: value,
     });
+    setLocalStorage({
+      opacity: value,
+    });
   };
   useEffect(() => {
     Messager.listen('img-position', (data) => {
@@ -32,13 +52,16 @@ function App() {
         left: parseInt(data.left),
         top: parseInt(data.top),
       };
-      setImgInfo((imgInfo) => ({ ...imgInfo, ...position }));
+      setImgInfo((imgInfo) => {
+        setLocalStorage({ ...imgInfo, ...position });
+        return { ...imgInfo, ...position };
+      });
     });
   }, []);
   useEffect(() => {
-    const url = window.localStorage.getItem('eruda-pixel');
-    const imgBlob = base64ToBlob(url);
-    imgBlob && createImg(imgBlob, false);
+    const imgCache = getLocalStorage();
+    const imgBlob = base64ToBlob(imgCache.url);
+    imgBlob && createImg(imgBlob, true);
   }, []);
 
   const [url, setUrl] = useState('');
@@ -47,7 +70,9 @@ function App() {
     reader.readAsDataURL(file);
     reader.onload = function () {
       const url: string = this.result as string;
-      window.localStorage.setItem('eruda-pixel', url);
+      setLocalStorage({
+        url: url,
+      });
     };
   }
   function base64ToBlob(base64: string | null) {
@@ -64,9 +89,9 @@ function App() {
     }
     return new Blob([u8arr], { type: mime });
   }
-  function createImg(file: Blob, isUpload = false) {
+  function createImg(file: Blob, isCache = false) {
     setLoading(true);
-    isUpload && blobToBase64(file); // 非上传的图片，不需要转成Base64并且存到 localStorage
+    !isCache && blobToBase64(file); // 非缓存的图片，需要转成Base64并且缓存到 localStorage
     const url = URL.createObjectURL(file);
     setUrl(url);
     var imgNode = document.createElement('img');
@@ -76,10 +101,23 @@ function App() {
     imgNode.style['top'] = '0px';
     imgNode.style['left'] = '0px';
     imgNode.style['display'] = 'block';
-    imgNode.style['opacity'] = '50%';
+    imgNode.style['opacity'] = '0.5';
     imgNode.style['zIndex'] = '1000';
     imgNode.id = 'eruda-pixel-upload-img';
 
+    let imgCache: any = null;
+    console.log('imgCache', imgCache);
+    if (isCache) {
+      // 从 localstorage 拿出来的图片，需要还原图片原来的配置
+      imgCache = getLocalStorage();
+      imgNode.style['opacity'] = imgCache.opacity / 100 + '';
+      imgNode.style['width'] = imgCache.width;
+      imgNode.style['height'] = imgCache.height;
+      imgNode.style['top'] = imgCache.top;
+      imgNode.style['left'] = imgCache.left;
+      imgNode.style['pointerEvents'] = imgCache.pointerEvents;
+    }
+    /* 图片插入逻辑 */
     let shadowRoot: ShadowRoot;
     const body = window.parent.document.body;
     // 删除原有的 img 容器
@@ -98,17 +136,40 @@ function App() {
       // shadow dom 降级
       imgContainer.appendChild(imgNode);
     }
+    /* 图片加载逻辑 */
     imgNode.onload = function () {
       setLoading(false);
-      setImgInfo({
+      let imgInfo = {
         width: (this as any).width,
         height: (this as any).height,
         left: 0,
         top: 0,
+      };
+      let opacity = 50;
+      let mode = 'normal';
+      let freeOrShowValue = ['show'];
+      if (isCache && imgCache) {
+        imgInfo = {
+          width: imgCache.width,
+          height: imgCache.height,
+          left: imgCache.left,
+          top: imgCache.top,
+        };
+        opacity = imgCache.opacity;
+        mode = imgCache.mode;
+        freeOrShowValue = imgCache.pointerEvents === 'none' ? ['show', 'freeze'] : ['show'];
+      }
+
+      setImgInfo(imgInfo);
+      setSize(opacity);
+      setModeValue(mode);
+      setFreeOrShowValue(freeOrShowValue);
+      setLocalStorage({
+        ...imgInfo,
+        opacity: opacity,
+        mode: mode,
       });
-      setSize(50);
-      setModeValue('normal');
-      setFreeOrShowValue(['show']);
+
       Messager.send('img-created', 'created');
     };
   }
@@ -116,7 +177,7 @@ function App() {
     name: 'file',
     multiple: false,
     beforeUpload(file: Blob) {
-      createImg(file, true);
+      createImg(file, false);
       return false;
     },
   };
@@ -145,10 +206,16 @@ function App() {
     Messager.send('img-show', {
       show: checkedValues.includes('show'),
     });
+    setLocalStorage({
+      pointerEvents: checkedValues.includes('freeze') ? 'none' : 'auto',
+    });
   }
   function onModeChange(value: string) {
     setModeValue(value);
     Messager.send('img-mode', {
+      mode: value,
+    });
+    setLocalStorage({
       mode: value,
     });
   }
@@ -161,6 +228,7 @@ function App() {
     Messager.send('img-info', {
       info: info,
     });
+    setLocalStorage(info);
   }
   function onLeft(value: number) {
     const info = {
@@ -171,6 +239,7 @@ function App() {
     Messager.send('img-info', {
       info: info,
     });
+    setLocalStorage(info);
   }
   function onTop(value: number) {
     const info = {
@@ -181,6 +250,7 @@ function App() {
     Messager.send('img-info', {
       info: info,
     });
+    setLocalStorage(info);
   }
   const uploadButton = (
     <div>

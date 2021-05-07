@@ -106,7 +106,6 @@ function App() {
     imgNode.id = 'eruda-pixel-upload-img';
 
     let imgCache: any = null;
-    console.log('imgCache', imgCache);
     if (isCache) {
       // 从 localstorage 拿出来的图片，需要还原图片原来的配置
       imgCache = getLocalStorage();

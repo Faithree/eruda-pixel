@@ -38,38 +38,6 @@ module.exports = {
         },
       },
       {
-        test: /\.scss$/,
-        loaders: [
-          'css-loader',
-          {
-            loader: 'postcss-loader',
-            options: {
-              plugins: function () {
-                return [
-                  postcss.plugin('postcss-namespace', function () {
-                    // Add '.dev-tools .tools ' to every selector.
-                    return function (root) {
-                      root.walkRules(function (rule) {
-                        if (!rule.selectors) return rule;
-
-                        rule.selectors = rule.selectors.map(function (
-                          selector
-                        ) {
-                          return '.dev-tools .tools ' + selector;
-                        });
-                      });
-                    };
-                  }),
-                  classPrefix('eruda-'),
-                  autoprefixer,
-                ];
-              },
-            },
-          },
-          'sass-loader',
-        ],
-      },
-      {
         test: /\.hbs$/,
         loader: 'handlebars-loader',
       },

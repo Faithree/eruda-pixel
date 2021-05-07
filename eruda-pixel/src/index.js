@@ -3,8 +3,6 @@ import injectString from './core.txt';
 import styleString from './style.txt';
 import PostMessager from './post-messager';
 
-const injectJsOnce = onceJs(injectJs);
-const injectCssOnce = onceCss(injectCss);
 function injectJs(scriptContent, $iframe) {
   const div = $iframe.contentWindow.document.createElement('div');
   div.setAttribute('id', 'root');
@@ -18,32 +16,13 @@ function injectCss(cssContent, $iframe) {
   style.innerHTML = cssContent;
   $iframe.contentWindow.document.body.appendChild(style);
 }
-function onceJs(fn) {
-  let loaded = false;
-  return function () {
-    if (!loaded) {
-      fn.apply({}, arguments);
-      loaded = true;
-    }
-  };
-}
-function onceCss(fn) {
-  let loaded = false;
-  return function () {
-    if (!loaded) {
-      fn.apply({}, arguments);
-      loaded = true;
-    }
-  };
-}
+
 function _binndPostMessage($iframe, $el) {
   const targetWindow = $iframe.contentWindow;
   const Messager = new PostMessager(targetWindow, true);
   let $img = null;
   Messager.listen('img-created', () => {
-    const container = document.querySelector(
-      '#eruda-pixel-upload-img-container'
-    );
+    const container = document.querySelector('#eruda-pixel-upload-img-container');
     const shadowImg = container.shadowRoot
       ? container.shadowRoot.querySelector('#eruda-pixel-upload-img')
       : null;
@@ -92,23 +71,21 @@ function _binndPostMessage($iframe, $el) {
   });
 }
 module.exports = function (eruda) {
-  let { evalCss } = eruda.util;
   class Pixel extends eruda.Tool {
     constructor() {
       super();
       this.name = 'pixel';
-      this._style = evalCss(require('./style.scss'));
     }
     init($el, container) {
       super.init($el, container);
       $el.html(require('./template.hbs')());
+      const $iframe = this._$el.find('#eruda-pixel-iframe').get(0);
+      injectJs(injectString, $iframe);
+      injectCss(styleString, $iframe);
+      _binndPostMessage($iframe, this._$el);
     }
 
     show() {
-      const $iframe = this._$el.find('#eruda-pixel-iframe').get(0);
-      injectJsOnce(injectString, $iframe);
-      injectCssOnce(styleString, $iframe);
-      _binndPostMessage($iframe, this._$el);
       super.show();
     }
 
@@ -117,7 +94,6 @@ module.exports = function (eruda) {
     }
     destroy() {
       super.destroy();
-      evalCss.remove(this._style);
     }
   }
 

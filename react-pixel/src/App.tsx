@@ -1,16 +1,6 @@
 import { useState, useEffect } from 'react';
 
-import {
-  Space,
-  Card,
-  Checkbox,
-  Select,
-  Slider,
-  InputNumber,
-  Upload,
-  Col,
-  Row,
-} from 'antd';
+import { Space, Card, Checkbox, Select, Slider, InputNumber, Upload, Col, Row } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
 import { CheckboxValueType } from 'antd/lib/checkbox/Group';
 import 'antd/dist/antd.css'; // or 'antd/dist/antd.less'
@@ -23,9 +13,7 @@ function App() {
   const [size, setSize] = useState(100);
   const [loading, setLoading] = useState(false);
   const [modeValue, setModeValue] = useState('normal');
-  const [freeOrShowValue, setFreeOrShowValue] = useState<CheckboxValueType[]>([
-    'show',
-  ]);
+  const [freeOrShowValue, setFreeOrShowValue] = useState<CheckboxValueType[]>(['show']);
   const [imgInfo, setImgInfo] = useState({
     left: 0,
     top: 0,
@@ -47,59 +35,88 @@ function App() {
       setImgInfo((imgInfo) => ({ ...imgInfo, ...position }));
     });
   }, []);
+  useEffect(() => {
+    const url = window.localStorage.getItem('eruda-pixel');
+    const imgBlob = base64ToBlob(url);
+    imgBlob && createImg(imgBlob, false);
+  }, []);
 
   const [url, setUrl] = useState('');
+  function blobToBase64(file: Blob) {
+    const reader = new FileReader();
+    reader.readAsDataURL(file);
+    reader.onload = function () {
+      const url: string = this.result as string;
+      window.localStorage.setItem('eruda-pixel', url);
+    };
+  }
+  function base64ToBlob(base64: string | null) {
+    if (!base64) {
+      return null;
+    }
+    let arr: any = base64.split(',');
+    let mime = arr[0].match(/:(.*?);/)[1];
+    let bstr = atob(arr[1]);
+    let n = bstr.length;
+    let u8arr = new Uint8Array(n);
+    while (n--) {
+      u8arr[n] = bstr.charCodeAt(n);
+    }
+    return new Blob([u8arr], { type: mime });
+  }
+  function createImg(file: Blob, isUpload = false) {
+    setLoading(true);
+    isUpload && blobToBase64(file); // 非上传的图片，不需要转成Base64并且存到 localStorage
+    const url = URL.createObjectURL(file);
+    setUrl(url);
+    var imgNode = document.createElement('img');
+    imgNode.src = url;
+    imgNode.style['cursor'] = 'all-scroll';
+    imgNode.style['position'] = 'fixed';
+    imgNode.style['top'] = '0px';
+    imgNode.style['left'] = '0px';
+    imgNode.style['display'] = 'block';
+    imgNode.style['opacity'] = '50%';
+    imgNode.style['zIndex'] = '1000';
+    imgNode.id = 'eruda-pixel-upload-img';
+
+    let shadowRoot: ShadowRoot;
+    const body = window.parent.document.body;
+    // 删除原有的 img 容器
+    window.parent.document.getElementById('eruda-pixel-upload-img-container')?.remove();
+    // 创建 img 容器
+    let imgContainer = document.createElement('div');
+    imgContainer.id = 'eruda-pixel-upload-img-container';
+    body.appendChild(imgContainer);
+    imgContainer.style.all = 'initial';
+
+    if (imgContainer.attachShadow) {
+      // shadow dom 避免样式污染
+      shadowRoot = imgContainer.attachShadow({ mode: 'open' });
+      shadowRoot.appendChild(imgNode);
+    } else {
+      // shadow dom 降级
+      imgContainer.appendChild(imgNode);
+    }
+    imgNode.onload = function () {
+      setLoading(false);
+      setImgInfo({
+        width: (this as any).width,
+        height: (this as any).height,
+        left: 0,
+        top: 0,
+      });
+      setSize(50);
+      setModeValue('normal');
+      setFreeOrShowValue(['show']);
+      Messager.send('img-created', 'created');
+    };
+  }
   const props: any = {
     name: 'file',
     multiple: false,
-    beforeUpload(file: FileReader) {
-      setLoading(true);
-      const url = URL.createObjectURL(file);
-      setUrl(url);
-      var imgNode = document.createElement('img');
-      imgNode.src = url;
-      imgNode.style['cursor'] = 'all-scroll';
-      imgNode.style['position'] = 'fixed';
-      imgNode.style['top'] = '0px';
-      imgNode.style['left'] = '0px';
-      imgNode.style['display'] = 'block';
-      imgNode.style['opacity'] = '50%';
-      imgNode.style['zIndex'] = '1000';
-      imgNode.id = 'eruda-pixel-upload-img';
-
-      let shadowRoot: ShadowRoot;
-      const body = window.parent.document.body;
-      // 删除原有的 img 容器
-      window.parent.document
-        .getElementById('eruda-pixel-upload-img-container')
-        ?.remove();
-      // 创建 img 容器
-      let imgContainer = document.createElement('div');
-      imgContainer.id = 'eruda-pixel-upload-img-container';
-      body.appendChild(imgContainer);
-      imgContainer.style.all = 'initial'
-
-      if (imgContainer.attachShadow) {
-        // shadow dom 避免样式污染
-        shadowRoot = imgContainer.attachShadow({ mode: 'open' });
-        shadowRoot.appendChild(imgNode);
-      } else {
-        // shadow dom 降级
-        imgContainer.appendChild(imgNode);
-      }
-      imgNode.onload = function () {
-        setLoading(false);
-        setImgInfo({
-          width: (this as any).width,
-          height: (this as any).height,
-          left: 0,
-          top: 0,
-        });
-        setSize(50);
-        setModeValue('normal');
-        setFreeOrShowValue(['show']);
-        Messager.send('img-created', 'created');
-      };
+    beforeUpload(file: Blob) {
+      createImg(file, true);
       return false;
     },
   };

@@ -13,7 +13,7 @@ function getLocalStorage() {
   return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
 }
 
-function setLocalStorage(obj: Record<string, string | number>) {
+function setLocalStorage(obj: Record<string, string | number | object>) {
   // 取
   const cacheObj = getLocalStorage();
   // 存
@@ -143,6 +143,10 @@ function App() {
         height: (this as any).height,
         left: 0,
         top: 0,
+        origin: {
+          width: (this as any).width,
+          height: (this as any).height,
+        },
       };
       let opacity = 50;
       let mode = 'normal';
@@ -153,6 +157,10 @@ function App() {
           height: imgCache.height,
           left: imgCache.left,
           top: imgCache.top,
+          origin: {
+            width: imgCache?.origin?.width ?? 0,
+            height: imgCache?.origin?.height ?? 0,
+          },
         };
         opacity = imgCache.opacity;
         mode = imgCache.mode;
@@ -219,9 +227,12 @@ function App() {
     });
   }
   function onWidth(value: number) {
+    const imgCache = getLocalStorage();
+    const height = imgCache.origin.height / (imgCache.origin.width / value);
     const info = {
       ...imgInfo,
       width: value,
+      height: height,
     };
     setImgInfo(info);
     Messager.send('img-info', {

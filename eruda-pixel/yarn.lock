@@ -1866,10 +1866,10 @@ error-ex@^1.2.0, error-ex@^1.3.1:
   dependencies:
     is-arrayish "^0.2.1"
 
-eruda@^1.8.1:
-  version "1.10.3"
-  resolved "https://registry.npm.taobao.org/eruda/download/eruda-1.10.3.tgz#3a2b065e8006bc84232d2336cd82a192439a0c45"
-  integrity sha1-OisGXoAGvIQjLSM2zYKhkkOaDEU=
+eruda@^2.4.1:
+  version "2.4.1"
+  resolved "https://registry.npm.taobao.org/eruda/download/eruda-2.4.1.tgz#dedc9b78546feb827d6ccafbfd7dae480509d2a2"
+  integrity sha1-3tybeFRv64J9bMr7/X2uSAUJ0qI=
 
 es-abstract@^1.18.0-next.2:
   version "1.18.0"

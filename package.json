@@ -22,5 +22,8 @@
   "homepage": "https://github.com/Faithree/eruda-pixel#readme",
   "devDependencies": {
     "shelljs": "^0.8.4"
+  },
+  "dependencies": {
+    "eruda": "^2.4.1"
   }
 }

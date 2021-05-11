@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback, useRef } from 'react';
 
 import { Space, Card, Checkbox, Select, Slider, InputNumber, Upload, Col, Row } from 'antd';
 import { LoadingOutlined, PlusOutlined } from '@ant-design/icons';
@@ -8,12 +8,32 @@ import PostMessager from './post-messager';
 
 import './App.css';
 const Messager = new PostMessager(window.parent, true);
-
-function getLocalStorage() {
-  return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
+function useRefCallback<T extends (...args: any[]) => any>(callback: T) {
+  const callbackRef = useRef(callback);
+  callbackRef.current = callback;
+  return useCallback((...args: any[]) => callbackRef.current(...args), []) as T;
 }
-
-function setLocalStorage(obj: Record<string, string | number | object>) {
+const getLocalStorage = () => {
+  return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
+};
+interface CSSStyleDeclarations extends CSSStyleDeclaration {
+  mixBlendMode: string;
+}
+interface IimageCache {
+  height: number;
+  left: number;
+  mode: string;
+  opacity: number;
+  origin: {
+    width: number;
+    height: number;
+  };
+  pointerEvents: string;
+  top: number;
+  url: string;
+  width: number;
+}
+const setLocalStorage = (obj: Record<string, string | number | object>) => {
   // 取
   const cacheObj = getLocalStorage();
   // 存
@@ -24,7 +44,7 @@ function setLocalStorage(obj: Record<string, string | number | object>) {
       ...obj,
     }),
   );
-}
+};
 
 function App() {
   const [size, setSize] = useState(100);
@@ -58,14 +78,9 @@ function App() {
       });
     });
   }, []);
-  useEffect(() => {
-    const imgCache = getLocalStorage();
-    const imgBlob = base64ToBlob(imgCache.url);
-    imgBlob && createImg(imgBlob, true);
-  }, []);
 
   const [url, setUrl] = useState('');
-  function blobToBase64(file: Blob) {
+  const blobToBase64 = (file: Blob) => {
     const reader = new FileReader();
     reader.readAsDataURL(file);
     reader.onload = function () {
@@ -74,8 +89,8 @@ function App() {
         url: url,
       });
     };
-  }
-  function base64ToBlob(base64: string | null) {
+  };
+  const base64ToBlob = (base64: string | null) => {
     if (!base64) {
       return null;
     }
@@ -88,8 +103,8 @@ function App() {
       u8arr[n] = bstr.charCodeAt(n);
     }
     return new Blob([u8arr], { type: mime });
-  }
-  function createImg(file: Blob, isCache = false) {
+  };
+  const createImg = useRefCallback((file: Blob, isCache = false) => {
     setLoading(true);
     !isCache && blobToBase64(file); // 非缓存的图片，需要转成Base64并且缓存到 localStorage
     const url = URL.createObjectURL(file);
@@ -105,16 +120,17 @@ function App() {
     imgNode.style['zIndex'] = '1000';
     imgNode.id = 'eruda-pixel-upload-img';
 
-    let imgCache: any = null;
+    let imgCache: IimageCache;
     if (isCache) {
       // 从 localstorage 拿出来的图片，需要还原图片原来的配置
       imgCache = getLocalStorage();
       imgNode.style['opacity'] = imgCache.opacity / 100 + '';
-      imgNode.style['width'] = imgCache.width;
-      imgNode.style['height'] = imgCache.height;
-      imgNode.style['top'] = imgCache.top;
-      imgNode.style['left'] = imgCache.left;
+      imgNode.style['width'] = imgCache.width + '';
+      imgNode.style['height'] = imgCache.height + '';
+      imgNode.style['top'] = imgCache.top + '';
+      imgNode.style['left'] = imgCache.left + '';
       imgNode.style['pointerEvents'] = imgCache.pointerEvents;
+      (imgNode.style as CSSStyleDeclarations)['mixBlendMode'] = imgCache.mode;
     }
     /* 图片插入逻辑 */
     let shadowRoot: ShadowRoot;
@@ -179,7 +195,12 @@ function App() {
 
       Messager.send('img-created', 'created');
     };
-  }
+  });
+  useEffect(() => {
+    const imgCache = getLocalStorage();
+    const imgBlob = base64ToBlob(imgCache.url);
+    imgBlob && createImg(imgBlob, true);
+  }, [createImg]);
   const props: any = {
     name: 'file',
     multiple: false,
@@ -205,7 +226,7 @@ function App() {
     { label: '柔光', value: 'soft-light' },
   ];
 
-  function onFreeOrShowChange(checkedValues: CheckboxValueType[]) {
+  const onFreeOrShowChange = (checkedValues: CheckboxValueType[]) => {
     setFreeOrShowValue(checkedValues);
     Messager.send('img-freeze', {
       freeze: checkedValues.includes('freeze'),
@@ -216,8 +237,8 @@ function App() {
     setLocalStorage({
       pointerEvents: checkedValues.includes('freeze') ? 'none' : 'auto',
     });
-  }
-  function onModeChange(value: string) {
+  };
+  const onModeChange = (value: string) => {
     setModeValue(value);
     Messager.send('img-mode', {
       mode: value,
@@ -225,8 +246,8 @@ function App() {
     setLocalStorage({
       mode: value,
     });
-  }
-  function onWidth(value: number) {
+  };
+  const onWidth = (value: number) => {
     const imgCache = getLocalStorage();
     const height = imgCache.origin.height / (imgCache.origin.width / value);
     const info = {
@@ -239,8 +260,8 @@ function App() {
       info: info,
     });
     setLocalStorage(info);
-  }
-  function onLeft(value: number) {
+  };
+  const onLeft = (value: number) => {
     const info = {
       ...imgInfo,
       left: value,
@@ -250,8 +271,8 @@ function App() {
       info: info,
     });
     setLocalStorage(info);
-  }
-  function onTop(value: number) {
+  };
+  const onTop = (value: number) => {
     const info = {
       ...imgInfo,
       top: value,
@@ -261,7 +282,7 @@ function App() {
       info: info,
     });
     setLocalStorage(info);
-  }
+  };
   const uploadButton = (
     <div>
       {loading ? <LoadingOutlined /> : <PlusOutlined />}

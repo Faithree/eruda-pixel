@@ -64,7 +64,7 @@ function _bindPostMessage($iframe) {
   });
 
   Messager.listen('img-mode', (data) => {
-    $img.style['mix-blend-mode'] = data.mode;
+    $img.style['mixBlendMode'] = data.mode;
   });
 
   Messager.listen('img-info', (data) => {

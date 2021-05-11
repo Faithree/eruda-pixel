@@ -29,7 +29,7 @@ export default class PostMessager {
       try {
         // 解析消息体
         const res = JSON.parse(evt.data);
-        console.log(res);
+        // console.log(res);
         // 接收到目标窗口发送来的准备就绪系统消息，表示通信机制已成功建立
         if (res.type === readyType) {
           this.isReady = true;

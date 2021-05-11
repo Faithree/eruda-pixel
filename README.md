@@ -70,7 +70,7 @@ loadJS(
 ```
 
 ### 功能
-需要手动上传 ui 设计图到此插件上（图片存放到页面内存里，不会上传到任何地方）。
+点开 pixel 面板，上传 ui 设计图（图片存放到页面内存里，不会上传到任何地方）。
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/f9dd047a8648468091d0ee27566cada9~tplv-k3u1fbpfcp-watermark.image)
 
@@ -84,4 +84,4 @@ loadJS(
 1. 方便快速，支持 npm 和 cdn 安装，甚至能像我上面的 demo 通过抓包工具注入插件到某个网站上
 2. 支持手机真机调试
 3. 插件使用 shadow dom + iframe，没有 DOM、JavaScript、CSS 污染真实页面
-4. 虽然是移动端调试工具，但是 pc 端也适用。
+4. 虽然是移动端调试工具，但是 pc 端也适用

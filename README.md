@@ -11,6 +11,9 @@
 
 ![image.png](https://p3-juejin.byteimg.com/tos-cn-i-k3u1fbpfcp/e4c3f82c61044b3a86e19cab09dcb617~tplv-k3u1fbpfcp-watermark.image)
 
+### Demo 体验
+[体验地址](https://faithree.github.io/eruda-pixel/)
+
 ### 安装
 #### npm 安装
 

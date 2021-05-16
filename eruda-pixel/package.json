@@ -8,9 +8,11 @@
     "ci": "npm run lint && npm run build",
     "lint": "eslint src/**/*.js"
   },
+  "license": "MIT",
+  "homepage": "https://faithree.github.io/eruda-pixel",
   "repository": {
     "type": "git",
-    "url": "git+https://github.com/Faithree/eruda-pixel.git"
+    "url": "https://github.com/Faithree/eruda-pixel.git"
   },
   "files": [
     "eruda-pixel.js",
@@ -23,7 +25,7 @@
     "UI",
     "javascript",
     "React",
-    "\b前端代码走查"
+    "前端代码走查"
   ],
   "author": "Faithree",
   "devDependencies": {

@@ -14,19 +14,20 @@ function useRefCallback<T extends (...args: any[]) => any>(callback: T) {
   return useCallback((...args: any[]) => callbackRef.current(...args), []) as T;
 }
 const getLocalStorage = () => {
+  console.log('getLocalStorage');
   return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
 };
 interface CSSStyleDeclarations extends CSSStyleDeclaration {
   mixBlendMode: string;
 }
 interface IimageCache {
-  height: number;
+  height: string;
   left: number;
   mode: string;
   opacity: number;
   origin: {
     width: number;
-    height: number;
+    height: string;
   };
   pointerEvents: string;
   top: number;
@@ -55,7 +56,7 @@ function App() {
     left: 0,
     top: 0,
     width: 0,
-    height: 0,
+    height: 'auto',
   });
   const onInnputChange = (value: number) => {
     setSize(value);
@@ -104,9 +105,9 @@ function App() {
     }
     return new Blob([u8arr], { type: mime });
   };
-  const createImg = useRefCallback((file: Blob, isCache = false) => {
+  const createImg = useRefCallback((file: Blob, imgCache?: IimageCache) => {
     setLoading(true);
-    !isCache && blobToBase64(file); // 非缓存的图片，需要转成Base64并且缓存到 localStorage
+    !imgCache && blobToBase64(file); // 非缓存的图片，需要转成Base64并且缓存到 localStorage
     const url = URL.createObjectURL(file);
     setUrl(url);
     var imgNode = document.createElement('img');
@@ -120,13 +121,12 @@ function App() {
     imgNode.style['zIndex'] = '1000';
     imgNode.id = 'eruda-pixel-upload-img';
 
-    let imgCache: IimageCache;
-    if (isCache) {
+    // let imgCache: IimageCache;
+    if (imgCache) {
       // 从 localstorage 拿出来的图片，需要还原图片原来的配置
-      imgCache = getLocalStorage();
       imgNode.style['opacity'] = imgCache.opacity / 100 + '';
       imgNode.style['width'] = imgCache.width + '';
-      imgNode.style['height'] = imgCache.height + '';
+      imgNode.style['height'] = 'auto';
       imgNode.style['top'] = imgCache.top + '';
       imgNode.style['left'] = imgCache.left + '';
       imgNode.style['pointerEvents'] = imgCache.pointerEvents;
@@ -156,26 +156,26 @@ function App() {
       setLoading(false);
       let imgInfo = {
         width: (this as any).width,
-        height: (this as any).height,
+        height: 'auto',
         left: 0,
         top: 0,
         origin: {
           width: (this as any).width,
-          height: (this as any).height,
+          height: 'auto',
         },
       };
       let opacity = 50;
       let mode = 'normal';
       let freeOrShowValue = ['show'];
-      if (isCache && imgCache) {
+      if (imgCache) {
         imgInfo = {
           width: imgCache.width,
-          height: imgCache.height,
+          height: 'auto',
           left: imgCache.left,
           top: imgCache.top,
           origin: {
             width: imgCache?.origin?.width ?? 0,
-            height: imgCache?.origin?.height ?? 0,
+            height: 'auto',
           },
         };
         opacity = imgCache.opacity;
@@ -199,13 +199,13 @@ function App() {
   useEffect(() => {
     const imgCache = getLocalStorage();
     const imgBlob = base64ToBlob(imgCache.url);
-    imgBlob && createImg(imgBlob, true);
+    imgBlob && createImg(imgBlob, imgCache);
   }, [createImg]);
   const props: any = {
     name: 'file',
     multiple: false,
     beforeUpload(file: Blob) {
-      createImg(file, false);
+      createImg(file);
       return false;
     },
   };
@@ -248,12 +248,9 @@ function App() {
     });
   };
   const onWidth = (value: number) => {
-    const imgCache = getLocalStorage();
-    const height = imgCache.origin.height / (imgCache.origin.width / value);
     const info = {
       ...imgInfo,
       width: value,
-      height: height,
     };
     setImgInfo(info);
     Messager.send('img-info', {

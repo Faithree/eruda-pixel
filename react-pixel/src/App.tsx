@@ -14,7 +14,6 @@ function useRefCallback<T extends (...args: any[]) => any>(callback: T) {
   return useCallback((...args: any[]) => callbackRef.current(...args), []) as T;
 }
 const getLocalStorage = () => {
-  console.log('getLocalStorage');
   return JSON.parse(window.localStorage.getItem('eruda-pixel') || '{}');
 };
 interface CSSStyleDeclarations extends CSSStyleDeclaration {
@@ -58,6 +57,7 @@ function App() {
     width: 0,
     height: 'auto',
   });
+  const imgCacheUrlRef = useRef('');
   const onInnputChange = (value: number) => {
     setSize(value);
     Messager.send('img-opacity', {
@@ -209,6 +209,20 @@ function App() {
       return false;
     },
   };
+  if (!imgCacheUrlRef.current) {
+    imgCacheUrlRef.current = getLocalStorage()?.url ?? '';
+    imgCacheUrlRef.current &&
+      (props.defaultFileList = [
+        {
+          uid: '1',
+          name: 'xxx.png',
+          status: 'done',
+          response: 'cache img', // custom error message to show
+          url: imgCacheUrlRef.current,
+        },
+      ]);
+  }
+
   const plainOptions = [
     { label: '冻结', value: 'freeze' },
     { label: '显示', value: 'show' },

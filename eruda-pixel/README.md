@@ -55,7 +55,7 @@ const loadJS = (urls, callback) => {
 loadJS(
   [
     '//cdn.bootcdn.net/ajax/libs/eruda/2.4.1/eruda.min.js',
-    '//unpkg.com/eruda-pixel@1.0.11/eruda-pixel.js',
+    '//unpkg.com/eruda-pixel@1.0.12/eruda-pixel.js',
   ],
   () => {
     const eruda = window.eruda;

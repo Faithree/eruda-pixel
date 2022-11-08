@@ -66,6 +66,9 @@ function _bindPostMessage($iframe) {
   Messager.listen('img-mode', (data) => {
     $img.style['mixBlendMode'] = data.mode;
   });
+  Messager.listen('reload', (data) => {
+    window.location.reload();
+  });
 
   Messager.listen('img-info', (data) => {
     $img.style['width'] = data.info.width + 'px';

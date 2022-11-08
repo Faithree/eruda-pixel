@@ -41,10 +41,10 @@
       loadJS(
         [
           '//cdn.bootcdn.net/ajax/libs/eruda/2.4.1/eruda.min.js',
-          '//unpkg.com/eruda-pixel@1.0.9/eruda-pixel.js',
+          '//unpkg.com/eruda-pixel@1.0.11/eruda-pixel.js',
         ],
         () => {
-          const eruda = window.eruda;
+          const eruda = window.eruda
           if (typeof eruda !== 'undefined') {
             eruda.init();
             eruda.add(window.erudaPixel).show('pixel').show();

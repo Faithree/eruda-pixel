@@ -415,7 +415,7 @@ function App() {
           maxCount={1}
           onRemove={() => {
             window.localStorage.setItem('eruda-pixel', JSON.stringify({}));
-            Messager.send('reload', {});
+            window.parent.location.reload();
           }}
           showUploadList={{ showPreviewIcon: false }}
         >

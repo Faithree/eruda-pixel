@@ -1,6 +1,6 @@
 {
   "name": "eruda-pixel",
-  "version": "1.0.12",
+  "version": "1.0.13",
   "main": "eruda-pixel.js",
   "scripts": {
     "dev": "webpack-dev-server --host 0.0.0.0",

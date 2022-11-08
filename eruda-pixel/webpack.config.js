@@ -11,7 +11,7 @@ module.exports = {
   entry: './src/index.js',
   devServer: {
     contentBase: './',
-    port: 5000,
+    port: 30010,
   },
   output: {
     path: __dirname,

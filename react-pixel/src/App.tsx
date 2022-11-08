@@ -409,7 +409,16 @@ function App() {
         </Row>
       </Card>
       <Card>
-        <Upload {...props} listType="picture-card" maxCount={1}>
+        <Upload
+          {...props}
+          listType="picture-card"
+          maxCount={1}
+          onRemove={() => {
+            window.localStorage.setItem('eruda-pixel', JSON.stringify({}));
+            window.location.reload();
+          }}
+          showUploadList={{ showPreviewIcon: false }}
+        >
           {uploadButton}
         </Upload>
       </Card>

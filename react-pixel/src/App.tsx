@@ -29,6 +29,7 @@ interface IimageCache {
     height: string;
   };
   pointerEvents: string;
+  freeOrShowValue: string[]
   top: number;
   url: string;
   width: number;
@@ -180,7 +181,8 @@ function App() {
         };
         opacity = imgCache.opacity;
         mode = imgCache.mode;
-        freeOrShowValue = imgCache.pointerEvents === 'none' ? ['show', 'freeze'] : ['show'];
+        freeOrShowValue = imgCache.freeOrShowValue || [];
+        // freeOrShowValue = imgCache.pointerEvents === 'none' ? ['show', 'freeze'] : ['show'];
       }
 
       setImgInfo(imgInfo);
@@ -249,6 +251,7 @@ function App() {
       show: checkedValues.includes('show'),
     });
     setLocalStorage({
+      freeOrShowValue: checkedValues,
       pointerEvents: checkedValues.includes('freeze') ? 'none' : 'auto',
     });
   };

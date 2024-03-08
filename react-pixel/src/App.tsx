@@ -161,6 +161,7 @@ function App() {
         height: 'auto',
         left: 0,
         top: 0,
+        show: true,
         origin: {
           width: (this as any).width,
           height: 'auto',
@@ -175,6 +176,7 @@ function App() {
           height: 'auto',
           left: imgCache.left,
           top: imgCache.top,
+          show: imgCache.show === undefined ? true : imgCache.show,
           origin: {
             width: imgCache?.origin?.width ?? 0,
             height: 'auto',
@@ -182,9 +184,8 @@ function App() {
         };
         opacity = imgCache.opacity;
         mode = imgCache.mode;
-        freeOrShowValue = imgCache.pointerEvents === 'none' ? ['show', 'freeze'] : ['show'];
         freeOrShowValue = [
-          imgCache.show ? 'show' : '', 
+          imgInfo.show ? 'show' : '', 
           imgCache.pointerEvents === 'none' ? 'freeze' : ''
         ].filter(Boolean);
       }

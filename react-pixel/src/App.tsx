@@ -32,8 +32,9 @@ interface IimageCache {
   top: number;
   url: string;
   width: number;
+  show: boolean;
 }
-const setLocalStorage = (obj: Record<string, string | number | object>) => {
+const setLocalStorage = (obj: Record<string, string | number | object | boolean>) => {
   // 取
   const cacheObj = getLocalStorage();
   // 存
@@ -130,6 +131,7 @@ function App() {
       imgNode.style['top'] = imgCache.top + '';
       imgNode.style['left'] = imgCache.left + '';
       imgNode.style['pointerEvents'] = imgCache.pointerEvents;
+      imgNode.style.display = imgCache.show ? 'block' : 'none';
       (imgNode.style as CSSStyleDeclarations)['mixBlendMode'] = imgCache.mode;
     }
     /* 图片插入逻辑 */
@@ -181,6 +183,10 @@ function App() {
         opacity = imgCache.opacity;
         mode = imgCache.mode;
         freeOrShowValue = imgCache.pointerEvents === 'none' ? ['show', 'freeze'] : ['show'];
+        freeOrShowValue = [
+          imgCache.show ? 'show' : '', 
+          imgCache.pointerEvents === 'none' ? 'freeze' : ''
+        ].filter(Boolean);
       }
 
       setImgInfo(imgInfo);
@@ -250,6 +256,7 @@ function App() {
     });
     setLocalStorage({
       pointerEvents: checkedValues.includes('freeze') ? 'none' : 'auto',
+      show: checkedValues.includes('show'),
     });
   };
   const onModeChange = (value: string) => {
